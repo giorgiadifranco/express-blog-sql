@@ -6,7 +6,7 @@ const postsController = require('../controllers/postsController.js')
 
 //GET
 router.get('/', postsController.index)
-//router.get('/:slug', postsController.show)
+router.get('/:id', postsController.show)
 //DELETE
 router.delete('/:id', postsController.destroy)
 

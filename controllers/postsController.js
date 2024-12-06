@@ -46,11 +46,64 @@ const destroy = (req, res)=> {
         console.log(err, results);
         if(err) return res.status(500).json({ error: err.message })
         if(results.affectedRows === 0) return res.status(404).json({ error: `404!post not found whit this id:${id}` })
+
+            //richiesta avventua con successo
             return res.json({ status: 204, affectedRows: results.affectedRows })
     })
 
 }
 
+
+const show = (req, res) => {
+    //console.log(req.params.id);
+    const id = req.params.id;
+    console.log(id);
+  
+    // prepare the sql query to get the post by its id
+    const sql = 'SELECT * FROM posts WHERE id=?'
+  
+    // prepare another query to get all the ingredients associated with that post
+    const tagsSql = `
+      SELECT tags.*
+      FROM tags
+      JOIN post_tag ON tags.id = post_tag.tag_id
+      WHERE post_tag.post_id = ?
+    `;
+  
+  
+    // exectute the first query to get the post by its id
+    connection.query(sql, [id], (err, results) => {
+      if (err) return res.status(500).json({ error: err });
+      // handle the 404 error
+      if (!results[0]) return res.status(404).json({ error: `404! Not found` })
+  
+      // perpare the response data
+      const post = results[0]
+      console.log('post trvato', post);
+  
+      // execute the second query to get all the ingredients associated with that post
+      connection.query(tagsSql, [id], (err, tagsResults) => {
+        // handle 500 error
+        if (err) return res.status(500).json({ error: err })
+        console.log('👉', tagsResults);
+  
+        post.tags = tagsResults;
+  
+  
+        const responseData = {
+          data: post,
+        }
+  
+        console.log(responseData);
+  
+        // return the post
+        res.status(200).json(responseData);
+  
+      })
+  
+    })
+  
+  }
 
 
 
@@ -77,6 +130,6 @@ const destroy = (req, res)=> {
 module.exports = {
 
     index,
-   
-    destroy
+    show,
+   destroy
 }
