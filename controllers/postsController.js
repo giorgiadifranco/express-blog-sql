@@ -2,6 +2,7 @@
 const posts = require('../db/db.js')
 const fs = require('fs')
 const connection = require('../db/connection.js')
+const { log } = require('console')
 
 const index = (req, res)=>{
 
@@ -11,15 +12,45 @@ const index = (req, res)=>{
     connection.query(sql, (err, results)=> {
         if (err) return res.status(500).json({ error: err.message })
         
-            const resonseData = {
+            const responseData = {
                 data: results,
                 counter: results.length
             }
-            return res.status(200).json(resonseData)
+            return res.status(200).json(responseData)
         })
     
 
             }
+
+/*const show = (req, res)=> { 
+
+    const id = req.params.id;
+    console.log(id);
+
+    const sql = ' SELECT * FROM posts WHERE slug= ?'
+    
+    const 
+
+    
+}*/
+
+const destroy = (req, res)=> {
+    
+    console.log(req.params);
+
+    const id = req.params.id
+
+    const sql = 'DELETE FROM posts WHERE id = ?'
+
+    connection.query(sql, [id], (err, results)=>{
+        console.log(err, results);
+        if(err) return res.status(500).json({ error: err.message })
+        if(results.affectedRows === 0) return res.status(404).json({ error: `404!post not found whit this id:${id}` })
+            return res.json({ status: 204, affectedRows: results.affectedRows })
+    })
+
+}
+
 
 
 
@@ -31,113 +62,12 @@ const index = (req, res)=>{
     })
 }*/
 
-const show = (req, res)=>{
-
-    
-    const post = posts.find( (post) => post.slug == req.params.slug)
-    
-    if (!post){
-        return res.status(404).json({ error:`no post with ${JSON.stringify(post, null, 4)}`})
-    }
-
-  
-    return res.status(200).json({data: post})
-       
-
-    }
-
-const store = (req, res)=>{
-    
-    const post = {
-        title: req.body.title,
-        slug: req.body.slug,
-        content: req.body.content,
-        image: req.body.image,
-        ingredients: req.body.ingredients
-       }
-    posts.push(post)
-    
-
-    /*return res.json({
-
-        body: req.body })*/
-
-  
-        
-    
-    
-
-    fs.writeFileSync('./db/db.js', `module.exports = ${JSON.stringify(posts, null, 4)}` )
-    
-    return res.status(201).json({
-        status: 201,
-        data: posts,
-        count: posts.length
-    })
-
-}
-
-// PUT
-
-const update = (req, res)=>{
-    console.log(req.params);
-    
-    //find the post by slug
-    const post = posts.find( post => post.slug === req.params.slug)
-
-//check if the posts exists
-if(!post){
-    return res.status(404).json({ 
-
-        error:`no post with ${JSON.stringify(post, null, 4)}`
-
-});
-}
-
-//update the post object
-
-post.title = req.body.title
-post.slug = req.body.slug
-post.content = req.body.content
-post.image = req.body.image
-post.tags = req.body.tags
-
- 
-
-fs.writeFileSync('./db/db.js', `module.exports = ${JSON.stringify(posts, null, 4)}`)
-
-return res.json({ 
-    status: 201,
-    data: posts,
-    count: posts.length
-})
-
-}
-
-const destroy = (req, res)=> {
-
-    const post = posts.find( (post) => post.slug === req.params.slug)
 
 
-    //check if the posts exists
-if(!post){
-    return res.status(404).json({ 
-
-        error:`no post with ${JSON.stringify(post, null, 4)}`
-
-});
-}
-newPosts = posts.filter(post => post.slug !== req.params.slug)
-    //update the file with the new data
-    fs.writeFileSync('./db/db.js', `module.exports = ${JSON.stringify(newPosts, null, 4)}` )
 
 
-    res.json({
-        status: 201,
-        data: newPosts,
-        counter: newPosts.length
-      })
-}
+
+
  
 
 
@@ -147,8 +77,6 @@ newPosts = posts.filter(post => post.slug !== req.params.slug)
 module.exports = {
 
     index,
-    show, 
-    store,
-    update,
+   
     destroy
 }
