@@ -1,13 +1,35 @@
 // seconda rotta -- response con formato json
 const posts = require('../db/db.js')
 const fs = require('fs')
+const connection = require('../db/connection.js')
 
 const index = (req, res)=>{
+
+    const sql= 'SELECT * FROM posts'
+
+    //esecuzione della query
+    connection.query(sql, (err, results)=> {
+        if (err) return res.status(500).json({ error: err.message })
+        
+            const resonseData = {
+                data: results,
+                counter: results.length
+            }
+            return res.status(200).json(resonseData)
+        })
+    
+
+            }
+
+
+
+/*const index = (req, res)=>{
+    
     res.status(200).json({
         data: posts,
         counter: posts.length
     })
-}
+}*/
 
 const show = (req, res)=>{
 
